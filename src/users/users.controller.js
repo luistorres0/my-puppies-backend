@@ -1,5 +1,4 @@
-const users = [];
-
+const service = require("./users.service");
 const bcrypt = require("bcrypt");
 
 async function create(req, res, next) {
@@ -12,9 +11,9 @@ async function create(req, res, next) {
     password: hashedPassword,
   };
 
-  users.push(user);
+  const data = await service.create(user);
 
-  console.log(users);
+  console.log(data);
   res.sendStatus(201);
 }
 
@@ -27,7 +26,7 @@ async function authenticate(req, res, next) {
     return next({ status: 404, message: "User not found" });
   }
 
-  if (!await bcrypt.compare(password, foundUser.password)) {
+  if (!(await bcrypt.compare(password, foundUser.password))) {
     return next({ status: 400, message: "Invalid password" });
   }
 
