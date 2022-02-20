@@ -13,14 +13,13 @@ async function create(req, res, next) {
 
   const data = await service.create(user);
 
-  console.log(data);
   res.sendStatus(201);
 }
 
 async function authenticate(req, res, next) {
   const { email, password } = req.body.data;
 
-  const foundUser = users.find((user) => user.email === email);
+  const foundUser = await service.getUserByEmail(email);
 
   if (!foundUser) {
     return next({ status: 404, message: "User not found" });
