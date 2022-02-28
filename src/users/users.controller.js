@@ -1,6 +1,7 @@
 const service = require("./users.service");
 const bcrypt = require("bcrypt");
 const asyncErrorBoundary = require("../errors/asyncErrorBoundary");
+const jwt = require("jsonwebtoken");
 
 function isEmailValid(req, res, next) {
   const { email } = req.body.data;
@@ -51,7 +52,14 @@ async function create(req, res, next) {
 
   await service.create(user);
 
-  res.sendStatus(201);
+  const token = jwt.sign({ email: user.email }, "open_sesame_seed", { expiresIn: "1h" });
+
+  res.status(201).json({
+    data: {
+      email: user.email,
+      token,
+    },
+  });
 }
 
 async function authenticate(req, res, next) {
@@ -67,7 +75,14 @@ async function authenticate(req, res, next) {
     return next({ status: 400, message: "Invalid password" });
   }
 
-  res.json({ data: "Authenticated" });
+  const token = jwt.sign({ email: foundUser.email }, "open_sesame_seed", { expiresIn: "1h" });
+
+  res.status(201).json({
+    data: {
+      email: foundUser.email,
+      token,
+    },
+  });
 }
 
 module.exports = {

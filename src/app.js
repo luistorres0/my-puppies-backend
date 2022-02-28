@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 
 const userRouter = require("./users/users.router");
+const puppiesRouter = require("./puppies/puppies.router")
 const errorHandler = require("./errors/errorHandler");
 const notFound = require("./errors/notFound");
 
@@ -11,6 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/users", userRouter);
+app.use("/puppies", puppiesRouter)
 
 app.use(notFound);
 
