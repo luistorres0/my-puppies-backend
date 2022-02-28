@@ -1,5 +1,43 @@
 const service = require("./users.service");
 const bcrypt = require("bcrypt");
+const asyncErrorBoundary = require("../errors/asyncErrorBoundary");
+
+function isEmailValid(req, res, next) {
+  const { email } = req.body.data;
+  if (!email.match(/^\S+@\S+$/)) {
+    return next({ status: 400, message: "Please provide a valid email." });
+  }
+
+  next();
+}
+
+async function isEmailAlreadyInUse(req, res, next) {
+  const { email } = req.body.data;
+
+  const foundUser = await service.getUserByEmail(email);
+
+  if (foundUser) {
+    return next({
+      status: 400,
+      message: "Email assigned to an account. Please log in to account.",
+    });
+  }
+
+  next();
+}
+
+function isPasswordValid(req, res, next) {
+  const { password } = req.body.data;
+
+  if (password.length < 6) {
+    return next({
+      status: 400,
+      message: "Password is invalid. It must contain at least 6 characters.",
+    });
+  }
+
+  next();
+}
 
 async function create(req, res, next) {
   const { email, password } = req.body.data;
@@ -11,7 +49,7 @@ async function create(req, res, next) {
     password: hashedPassword,
   };
 
-  const data = await service.create(user);
+  await service.create(user);
 
   res.sendStatus(201);
 }
@@ -33,6 +71,15 @@ async function authenticate(req, res, next) {
 }
 
 module.exports = {
-  create: [create],
-  authenticate: [authenticate],
+  create: [
+    asyncErrorBoundary(isEmailValid),
+    asyncErrorBoundary(isEmailAlreadyInUse),
+    asyncErrorBoundary(isPasswordValid),
+    asyncErrorBoundary(create),
+  ],
+  authenticate: [
+    asyncErrorBoundary(isEmailValid),
+    asyncErrorBoundary(isPasswordValid),
+    asyncErrorBoundary(authenticate),
+  ],
 };
