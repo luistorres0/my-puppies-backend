@@ -9,7 +9,7 @@ function checkAuthentication(req, res, next) {
   }
 
   const decodedToken = jwt.verify(token, "open_sesame_seed");
-  res.locals.userEmail = decodedToken.email;
+  res.locals.userId = decodedToken.userId;
   next();
 }
 

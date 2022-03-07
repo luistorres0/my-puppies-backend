@@ -50,19 +50,19 @@ async function create(req, res, next) {
     password: hashedPassword,
   };
 
-  await service.create(user);
+  const createdUser = await service.create(user);
 
-  const token = jwt.sign({ email: user.email }, "open_sesame_seed", { expiresIn: "1h" });
+  const token = jwt.sign({ userId: createdUser.user_id }, "open_sesame_seed", { expiresIn: "1h" });
 
   res.status(201).json({
     data: {
-      email: user.email,
+      userId: createdUser.user_id,
       token,
     },
   });
 }
 
-async function authenticate(req, res, next) {
+async function login(req, res, next) {
   const { email, password } = req.body.data;
 
   const foundUser = await service.getUserByEmail(email);
@@ -75,11 +75,11 @@ async function authenticate(req, res, next) {
     return next({ status: 400, message: "Invalid password" });
   }
 
-  const token = jwt.sign({ email: foundUser.email }, "open_sesame_seed", { expiresIn: "1h" });
+  const token = jwt.sign({ userId: foundUser.user_id }, "open_sesame_seed", { expiresIn: "1h" });
 
   res.status(201).json({
     data: {
-      email: foundUser.email,
+      userId: foundUser.user_id,
       token,
     },
   });
@@ -92,9 +92,9 @@ module.exports = {
     asyncErrorBoundary(isPasswordValid),
     asyncErrorBoundary(create),
   ],
-  authenticate: [
+  login: [
     asyncErrorBoundary(isEmailValid),
     asyncErrorBoundary(isPasswordValid),
-    asyncErrorBoundary(authenticate),
+    asyncErrorBoundary(login),
   ],
 };

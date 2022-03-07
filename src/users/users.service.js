@@ -10,7 +10,12 @@ function getUserByEmail(email) {
   return knex("users").where({ email }, "*").first();
 }
 
+function getUserById(user_id) {
+  return knex("users").where({ user_id }, "*").first();
+}
+
 module.exports = {
   create,
-  getUserByEmail
+  getUserByEmail,
+  getUserById
 };
