@@ -52,11 +52,16 @@ async function create(req, res, next) {
 
   const createdUser = await service.create(user);
 
-  const token = jwt.sign({ userId: createdUser.user_id }, "open_sesame_seed", { expiresIn: "1h" });
+  const token = jwt.sign(
+    { email: createdUser.email, userId: createdUser.user_id },
+    "open_sesame_seed",
+    { expiresIn: "1h" }
+  );
 
   res.status(201).json({
     data: {
       userId: createdUser.user_id,
+      email: createdUser.email,
       token,
     },
   });
@@ -75,11 +80,16 @@ async function login(req, res, next) {
     return next({ status: 400, message: "Invalid password" });
   }
 
-  const token = jwt.sign({ userId: foundUser.user_id }, "open_sesame_seed", { expiresIn: "1h" });
+  const token = jwt.sign(
+    { email: foundUser.email, userId: foundUser.user_id },
+    "open_sesame_seed",
+    { expiresIn: "1h" }
+  );
 
   res.status(201).json({
     data: {
       userId: foundUser.user_id,
+      email: foundUser.email,
       token,
     },
   });
