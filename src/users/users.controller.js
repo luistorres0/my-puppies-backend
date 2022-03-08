@@ -2,6 +2,7 @@ const service = require("./users.service");
 const bcrypt = require("bcrypt");
 const asyncErrorBoundary = require("../errors/asyncErrorBoundary");
 const jwt = require("jsonwebtoken");
+const checkAuthentication = require("../common/checkAuthentication");
 
 function isEmailValid(req, res, next) {
   const { email } = req.body.data;
@@ -35,6 +36,18 @@ function isPasswordValid(req, res, next) {
       status: 400,
       message: "Password is invalid. It must contain at least 6 characters.",
     });
+  }
+
+  next();
+}
+
+async function doesUserExist(req, res, next) {
+  const userId = res.locals.userId;
+
+  const foundUser = await service.getUserById(userId);
+
+  if (!foundUser) {
+    return next({ status: 400, message: "User does not exist" });
   }
 
   next();
@@ -95,6 +108,14 @@ async function login(req, res, next) {
   });
 }
 
+async function deleteUser(req, res, next) {
+  const userId = res.locals.userId;
+  const data = await service.deleteUserById(userId);
+  res.json({
+    data,
+  });
+}
+
 module.exports = {
   create: [
     asyncErrorBoundary(isEmailValid),
@@ -107,4 +128,5 @@ module.exports = {
     asyncErrorBoundary(isPasswordValid),
     asyncErrorBoundary(login),
   ],
+  delete: [checkAuthentication, asyncErrorBoundary(doesUserExist), asyncErrorBoundary(deleteUser)],
 };

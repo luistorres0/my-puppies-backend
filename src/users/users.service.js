@@ -14,8 +14,13 @@ function getUserById(user_id) {
   return knex("users").where({ user_id }, "*").first();
 }
 
+function deleteUserById(user_id){
+  return knex("users").where({user_id}, "*").delete();
+}
+
 module.exports = {
   create,
   getUserByEmail,
-  getUserById
+  getUserById,
+  deleteUserById
 };
